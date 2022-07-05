@@ -1,5 +1,6 @@
 from django.test import TestCase, Client
 
+
 # Дополнительное задание 2.
 # Проверяем urls для about
 class StaticUrlTests(TestCase):
