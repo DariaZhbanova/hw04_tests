@@ -4,9 +4,10 @@
   Последние обновления на сайте
 {% endblock %}
 
-{% block content %}   
+{% block content %}
+  <a>
   <h1>Последние обновления на сайте</h1>
-  
+  </a>
   {% for post in page_obj %}
     {% include 'includes/texter.html' %}
     {% if post.group %}
