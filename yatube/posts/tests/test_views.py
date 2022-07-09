@@ -1,13 +1,10 @@
-# posts/tests/test_views.py
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
 from django import forms
-from posts.models import Post, User, Group
+from ..models import Post, User, Group
 
 User = get_user_model()
-
-# Задание 1. Тестируем шаблоны через namespace:name
 
 
 class PostTests(TestCase):
@@ -15,7 +12,6 @@ class PostTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # Создадим запись в БД
         cls.user = User.objects.create_user(username='Daria')
         cls.group = Group.objects.create(
             title='Группа АББА',
@@ -41,14 +37,12 @@ class PostWithGroupListsTests(PostTests):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # Создадим запись в БД
         cls.post = Post.objects.create(
             author=cls.user,
             text='Текст 1234',
             group=cls.group,
         )
 
-# Проверка контекста
     def test_index_page_show_correct_context(self):
         response = self.authorized_client.get(reverse('posts:index'))
         first_page_object = response.context['page_obj'][0]
@@ -75,13 +69,11 @@ class PostWithoutGroupListsTests(PostTests):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # Создадим запись в БД
         cls.post = Post.objects.create(
             author=cls.user,
             text='Текст 1234',
         )
 
-# Проверка контекста
     def test_index_page_show_correct_context(self):
         response = self.authorized_client.get(reverse('posts:index'))
         first_page_object = response.context['page_obj'][0]
@@ -108,13 +100,11 @@ class PostPagesTests(PostTests):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # Создадим запись в БД
         cls.post = Post.objects.create(
             author=cls.user,
             text='Текст 1234',
         )
 
-# Задание 2. Проверка контекста и форм
     def test_post_create_page_show_correct_context_form_ields(self):
         """Шаблон post_create сформирован с правильным контекстом."""
         response = self.authorized_client.get(reverse('posts:post_create'))
@@ -145,14 +135,15 @@ class PostPagesTests(PostTests):
         self.assertTrue(response.context.get('is_edit'))
 
     def test_post_detail_page_show_correct_context(self):
+        """Шаблон post_detail сформирован с правильным контекстом."""
         response = self.authorized_client.get(reverse(
             'posts:post_detail',
             kwargs={'post_id': self.post.pk}))
         self.assertPost(response.context['post'], self.post)
 
 
-# Задание про Пагинатор (для главной, групп и профайла)
 class PaginatorViewsTest(TestCase):
+    """Тестирование пагинатора для главной, профайла и страницы групп"""
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -202,10 +193,10 @@ class PaginatorViewsTest(TestCase):
 
 
 class TemplatesTests(TestCase):
+    """Проверка на использование во view-функциях правильных html-шаблонов"""
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # Создадим запись в БД
         cls.user = User.objects.create_user(username='Daria')
         cls.group = Group.objects.create(
             title='Группа АББА',
@@ -221,9 +212,7 @@ class TemplatesTests(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
-    # Проверяем используемые шаблоны
     def test_pages_uses_correct_template(self):
-        """URL-адрес использует соответствующий шаблон."""
         templates_pages_names = {
             reverse('posts:index'): 'posts/index.html',
             reverse(('posts:group_list'), kwargs={'slug':

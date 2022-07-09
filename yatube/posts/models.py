@@ -10,17 +10,20 @@ class Group(models.Model):
     slug = models.SlugField(unique=True)
     description = models.TextField()
 
-    # def __str__(self) -> str:
-    #     return f'{self.title[:30]}' так на ревью в 4 спринте попросил Андрей
-
     def __str__(self) -> str:
-        return f'{self.title}'
+        return f'{self.title[:30]}'
 
 
 class Post(models.Model):
+    # text_title = models.CharField(
+    #     max_length=200,
+    #     blank=True,
+    #     null=True,
+    #     help_text='Привлеките внимание читателей самым важным')
+    # pics = models.ImageField(upload_to='img_post', blank=True, null=True)
     text = models.TextField(
         'Текст поста',
-        help_text='Введите текст поста'
+        help_text='Поделитесь с общественностью важными новостями'
     )
     pub_date = models.DateTimeField(
         'Дата публикации',
@@ -37,7 +40,19 @@ class Post(models.Model):
         blank=True,
         null=True,
         verbose_name='Группа',
-        help_text='Группа, к которой будет относиться пост')
+        help_text='Группа, наиболее подходящая по смыслу поста')
+
+    # @property
+    # def get_text_title(self):
+    #     if self.text_title:
+    #         return self.text_title
+    #     return ""
+
+    # @property
+    # def get_pics(self):
+    #     if self.pics:
+    #         return self.pics
+    #     return ""
 
     class Meta:
         ordering = ['-pub_date']

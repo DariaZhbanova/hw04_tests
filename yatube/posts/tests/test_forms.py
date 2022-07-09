@@ -2,8 +2,7 @@ from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from ..models import Post, Group
 from django.urls import reverse
-from posts.forms import PostForm
-from users.forms import CreationForm
+from ..forms import PostForm
 
 User = get_user_model()
 
@@ -17,7 +16,6 @@ class PostFormTest(TestCase):
             title='Тестовая группа',
             slug='test-group',
         )
-        cls.form = PostForm()
 
     def setUp(self):
         self.authorized_client = Client()
@@ -36,7 +34,7 @@ class PostFormTest(TestCase):
             follow=True,
         )
         self.assertRedirects(response, reverse(
-            ('posts:profile'),
+            'posts:profile',
             kwargs={'username': f'{ self.user.username }'}))
         new_post_count = Post.objects.count()
         last_post = Post.objects.last()
@@ -62,7 +60,7 @@ class PostFormTest(TestCase):
             follow=True,
         )
         self.assertRedirects(response, reverse(
-            ('posts:post_detail'),
+            'posts:post_detail',
             kwargs={'post_id': f'{ example.pk }'}))
         after_edit_count = Post.objects.count()
 
@@ -70,20 +68,12 @@ class PostFormTest(TestCase):
         self.assertNotEqual(f'{ example.text }', form_data['text'])
 
 
-# Дополнительное задание
 class CreationFormTest(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.form = CreationForm()
-
-    def setUp(self):
-        self.guest_client = Client()
-
-    def test_new_user(self):
-        """Валидная форма создает запись в БД."""
-        users_count = User.objects.count()
-        form_data = {
+        cls.form = PostForm()
+        cls.form_data = {
             'first_name': 'Mark',
             'last_name': 'Brodskiy',
             'username': 'markmark',
@@ -91,9 +81,16 @@ class CreationFormTest(TestCase):
             'password1': '@Kuku6928',
             'password2': '@Kuku6928',
         }
+
+    def setUp(self):
+        self.guest_client = Client()
+
+    def test_new_user(self):
+        """Валидная форма создает запись в БД."""
+        users_count = User.objects.count()
         response = self.guest_client.post(
             reverse('users:signup'),
-            data=form_data,
+            data=self.form_data,
             follow=True,
         )
         self.assertRedirects(response, reverse('posts:index'))

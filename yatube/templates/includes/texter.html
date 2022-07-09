@@ -6,8 +6,12 @@
     <li>
       Дата публикации: {{ post.pub_date|date:"d E Y"}}
     </li>
-  </ul>      
+  </ul>
+  {% comment %} <h5>
+    {{ post.get_text_title }}
+  </h5> {% endcomment %}
   <p>
-    {{ post.text|truncatechars:30 }}
+    {{ post.text|truncatechars:258 }}
+    {% comment %} {{ post.get_pics }} {% endcomment %}
   </p>
 </article>
