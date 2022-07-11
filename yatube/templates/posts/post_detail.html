@@ -34,17 +34,17 @@
         </aside>
         <article class="col-12 col-md-9">
         <div class="container py-3">  
-          {% comment %} <h5>
+          <h5>
             {{ post.get_text_title }}
-          </h5> {% endcomment %}
+          </h5>
           <p>
             {{ post.text }}
-            {% comment %} {{ post.get_pics }} {% endcomment %}
+            <img src="{{ post.get_pics.url }}" alt="{{ post.title}}">
           </p>
           {% if post.author == request.user %}
           <a class="btn btn-primary" href="{% url "posts:post_edit" post.pk %}">
             редактировать запись
-          </a>   
+          </a>
           {%endif%}  
         </article>
       </div> 

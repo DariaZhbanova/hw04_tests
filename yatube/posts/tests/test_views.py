@@ -65,37 +65,6 @@ class PostWithGroupListsTests(PostTests):
         self.assertPost(first_page_object, self.post)
 
 
-class PostWithoutGroupListsTests(PostTests):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.post = Post.objects.create(
-            author=cls.user,
-            text='Текст 1234',
-        )
-
-    def test_index_page_show_correct_context(self):
-        response = self.authorized_client.get(reverse('posts:index'))
-        first_page_object = response.context['page_obj'][0]
-        self.assertPost(first_page_object, self.post)
-
-    def test_group_page_show_correct_context(self):
-        response = self.authorized_client.get(reverse(
-            'posts:group_list',
-            kwargs={'slug': f'{ self.group.slug }'}))
-        count_of_posts = len(response.context['page_obj'])
-        self.assertEqual(count_of_posts, 0)
-        group_object = response.context['group']
-        self.assertGroup(group_object, self.group)
-
-    def test_profile_page_show_correct_context(self):
-        response = self.authorized_client.get(reverse(
-            'posts:profile',
-            kwargs={'username': f'{ self.user.username }'}))
-        first_page_object = response.context['page_obj'][0]
-        self.assertPost(first_page_object, self.post)
-
-
 class PostPagesTests(PostTests):
     @classmethod
     def setUpClass(cls):
@@ -212,20 +181,20 @@ class TemplatesTests(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
-    def test_pages_uses_correct_template(self):
-        templates_pages_names = {
+    def test_views_uses_correct_template(self):
+        views_vs_templates = {
             reverse('posts:index'): 'posts/index.html',
-            reverse(('posts:group_list'), kwargs={'slug':
-                    f'{ self.group.slug }'}): 'posts/group_list.html',
-            reverse(('posts:profile'), kwargs={'username':
-                    f'{ self.user.username }'}): 'posts/profile.html',
-            reverse('posts:post_detail', kwargs={'post_id':
-                    f'{ self.post.pk }'}): 'posts/post_detail.html',
+            reverse('posts:group_list', kwargs={
+                'slug': f'{self.group.slug}'}): 'posts/group_list.html',
+            reverse('posts:profile', kwargs={
+                'username': f'{self.user.username}'}): 'posts/profile.html',
+            reverse('posts:post_detail', kwargs={
+                'post_id': f'{self.post.pk}'}): 'posts/post_detail.html',
             reverse('posts:post_create'): 'posts/post_create.html',
-            reverse('posts:post_edit', kwargs={'post_id':
-                    f'{ self.post.pk }'}): 'posts/post_create.html'
+            reverse('posts:post_edit', kwargs={
+                'post_id': f'{self.post.pk}'}): 'posts/post_create.html'
         }
-        for reverse_name, template in templates_pages_names.items():
+        for reverse_name, template in views_vs_templates.items():
             with self.subTest(reverse_name=reverse_name):
                 response = self.authorized_client.get(reverse_name)
                 self.assertTemplateUsed(response, template)

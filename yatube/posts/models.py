@@ -15,12 +15,12 @@ class Group(models.Model):
 
 
 class Post(models.Model):
-    # text_title = models.CharField(
-    #     max_length=200,
-    #     blank=True,
-    #     null=True,
-    #     help_text='Привлеките внимание читателей самым важным')
-    # pics = models.ImageField(upload_to='img_post', blank=True, null=True)
+    text_title = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text='Привлеките внимание читателей самым важным')
+    pics = models.ImageField(upload_to='media/', blank=True, null=True)
     text = models.TextField(
         'Текст поста',
         help_text='Поделитесь с общественностью важными новостями'
@@ -42,17 +42,17 @@ class Post(models.Model):
         verbose_name='Группа',
         help_text='Группа, наиболее подходящая по смыслу поста')
 
-    # @property
-    # def get_text_title(self):
-    #     if self.text_title:
-    #         return self.text_title
-    #     return ""
+    @property
+    def get_text_title(self):
+        if self.text_title:
+            return self.text_title
+        return ""
 
-    # @property
-    # def get_pics(self):
-    #     if self.pics:
-    #         return self.pics
-    #     return ""
+    @property
+    def get_pics(self):
+        if self.pics:
+            return self.pics
+        return ""
 
     class Meta:
         ordering = ['-pub_date']

@@ -10,10 +10,10 @@
   </a>
   {% for post in page_obj %}
     {% include 'includes/texter.html' %}
-    {% if post.group %}
-    <a href="{% url 'posts:post_detail' post.pk %}">подробная информация о посте</a>
-    <br>
-    <a href="{% url 'posts:group_list' post.group.slug %}">все записи группы</a>
+      <a href="{% url 'posts:post_detail' post.pk %}">подробная информация о посте</a>
+      {% if post.group %}
+      <br>
+      <a href="{% url 'posts:group_list' post.group.slug %}">все записи группы {{ post.group.title }}</a>
     {% endif %}
     {% if not forloop.last %}<hr>{% endif %}
   {% endfor %}

@@ -7,11 +7,13 @@
       Дата публикации: {{ post.pub_date|date:"d E Y"}}
     </li>
   </ul>
-  {% comment %} <h5>
+  <h5>
     {{ post.get_text_title }}
-  </h5> {% endcomment %}
+  </h5>
   <p>
-    {{ post.text|truncatechars:258 }}
-    {% comment %} {{ post.get_pics }} {% endcomment %}
+    {{ post.text }}<br>
+    {% comment %} {{ post.text|truncatechars:258 }} {% endcomment %}
+    <img src="{{ post.get_pics.url }}">
+
   </p>
 </article>

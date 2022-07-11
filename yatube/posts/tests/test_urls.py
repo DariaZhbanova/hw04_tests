@@ -47,56 +47,54 @@ class PostModelTest(TestCase):
                 response = self.authorized_client.get(address)
                 self.assertTemplateUsed(response, template)
 
-# Проверяем общедоступные страницы
-
-    def test_index_url_exists_at_desired_location(self):
-        """Проверка доступности адреса главной страницы."""
-        response = self.guest_client.get('/')
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-
-    def test_group_url_exists_at_desired_location(self):
-        """Проверка доступности адреса групп и их постов."""
-        response = self.guest_client.get(f'/group/{ self.group.slug }/')
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-
-    def test_profile_url_exists_at_desired_location(self):
-        """Проверка доступности адреса профиля автора."""
-        response = self.guest_client.get(
-            f'/profile/{ self.post.author.username }/')
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-
-    def test_post_detail_url_exists_at_desired_location(self):
-        """Проверка доступности адреса инфо о посте."""
-        response = self.guest_client.get(
-            f'/posts/{ self.post.pk }/')
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-
-    def test_post_edit_guest_url_exists_at_desired_location(self):
-        """Проверка доступности адреса редактирования поста (гость)."""
-        response = self.guest_client.get(f'/posts/{ self.post.pk }/edit/')
-        self.assertEqual(response.status_code, HTTPStatus.FOUND)
-
-    def test_post_edit_authorized_url_exists_at_desired_location(self):
-        """Проверка доступности адреса редактирования поста (посетитель)."""
-        response = self.authorized_client.get(f'/posts/{ self.post.pk }/edit/')
-        self.assertEqual(response.status_code, HTTPStatus.FOUND)
-
-    def test_post_edit_author_url_exists_at_desired_location(self):
-        """Проверка доступности адреса редактирования поста (автор)."""
-        example = Post.objects.create(
-            author=self.user,
-            text='Some user\'s authorized text')
-        response = self.authorized_client.get(f'/posts/{ example.pk }/edit/')
-        self.assertEqual(response.status_code, HTTPStatus.OK)
+    def test_unexisting_url(self):
+        """Проверка доступности адреса несуществующей стр."""
+        response = self.guest_client.get('/unexisting_page/')
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
     def test_create_url_exists_at_desired_location(self):
-        """Проверка доступности адреса создания поста и редирект."""
+        """Проверка доступности адреса создания поста для гостя и
+        редирект на страницу авторизации."""
         response = self.guest_client.get('/create/', follow=True)
         self.assertRedirects(
-            response, ('/auth/login/?next=/create/')
+            response, '/auth/login/?next=/create/'
         )
 
-    def test_unexisting_url_exists_at_desired_location(self):
-        """Проверка доступности адреса несуществующей стр."""
-        response = self.authorized_client.get('/unexisting_page/')
-        self.assertEqual(response.status_code, 404)
+    def test_pages_for_guest(self):
+        """Проверка доступности страниц для неавторизованных посетителей."""
+        templates_url_names_guest = {
+            '/',
+            f'/group/{self.group.slug}/',
+            f'/profile/{self.post.author.username}/',
+        }
+        for address in templates_url_names_guest:
+            with self.subTest(address=address):
+                response = self.guest_client.get(address)
+                self.assertEqual(response.status_code, HTTPStatus.OK)
+
+    def test_pages_for_authorized(self):
+        """Проверка доступности страниц для авторизованных пользователей."""
+        templates_url_names_authorized = {
+            '/',
+            f'/group/{self.group.slug}/',
+            f'/profile/{self.post.author.username}/',
+            f'/posts/{self.post.pk}/',
+            '/create/',
+        }
+        for address in templates_url_names_authorized:
+            with self.subTest(address=address):
+                response = self.authorized_client.get(address)
+                self.assertEqual(response.status_code, HTTPStatus.OK)
+
+    def test_pages_for_author(self):
+        """Проверка доступности страниц только для автора."""
+        example = Post.objects.create(
+            author=self.user,
+            text='Some author\'s text')
+        templates_url_names_author = {
+            f'/posts/{example.pk}/edit/',
+        }
+        for address in templates_url_names_author:
+            with self.subTest(address=address):
+                response = self.authorized_client.get(address)
+                self.assertEqual(response.status_code, HTTPStatus.OK)
