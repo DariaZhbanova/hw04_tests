@@ -1,3 +1,5 @@
+# from django.views.decorators.cache import cache_page
+import datetime
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -5,7 +7,7 @@ from django.shortcuts import (
     get_object_or_404,
     redirect,
     render)
-from .forms import PostForm
+from .forms import PostForm, CommentForm
 from .models import Group, Post, User
 
 
@@ -16,10 +18,13 @@ def my_own_paginator(queryset, request):
     return page_obj
 
 
+# @cache_page(20)
 def index(request):
     page_obj = my_own_paginator(Post.objects.all(), request)
+    now = datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S') # проверка для кеширования
     context = {
         'page_obj': page_obj,
+        'now': now,
     }
     return render(request, 'posts/index.html', context)
 
@@ -47,12 +52,22 @@ def profile(request, username):
 
 def post_detail(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    return render(request, 'posts/post_detail.html', {'post': post})
+    comments = post.comments.all()
+    form = CommentForm(request.POST or None)
+    context = {
+        'post': post,
+        'comments': comments,
+        'form': form,
+    }
+    return render(request, 'posts/post_detail.html', context)
 
 
 @login_required
 def post_create(request):
-    form = PostForm(request.POST or None)
+    form = PostForm(
+        request.POST or None,
+        files=request.FILES or None
+    )
     if request.method == 'POST':
         if form.is_valid():
             new_post = form.save(commit=False)
@@ -67,7 +82,10 @@ def post_edit(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     if post_id and request.user != post.author:
         return redirect('posts:post_detail', post_id=post_id)
-    form = PostForm(request.POST or None, instance=post)
+    form = PostForm(
+        request.POST or None,
+        files=request.FILES or None,
+        instance=post)
     if form.is_valid():
         form.save()
         return redirect('posts:post_detail', post_id=post_id)
@@ -76,3 +94,16 @@ def post_edit(request, post_id):
         'is_edit': True,
     }
     return render(request, 'posts/post_create.html', context)
+
+
+@login_required
+def add_comment(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    if request.method == 'POST':
+        form = CommentForm(request.POST or None)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.author = request.user
+            comment.post = post
+            comment.save()
+    return redirect('posts:post_detail', post_id=post_id)

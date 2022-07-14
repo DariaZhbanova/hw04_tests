@@ -7,7 +7,10 @@
 {% block content %}
   <a>
   <h1>Последние обновления на сайте</h1>
+  {% comment %} <h5>Сегодня {{ now }}</h5><br> {% endcomment %}
   </a>
+  {% load cache %}
+  {% cache 20 page_obj %}
   {% for post in page_obj %}
     {% include 'includes/texter.html' %}
       <a href="{% url 'posts:post_detail' post.pk %}">подробная информация о посте</a>
@@ -17,6 +20,7 @@
     {% endif %}
     {% if not forloop.last %}<hr>{% endif %}
   {% endfor %}
+  {% endcache %}
 
   {% include 'posts/includes/paginator.html' %}
   

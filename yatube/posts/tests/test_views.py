@@ -27,13 +27,50 @@ class PostTests(TestCase):
         self.assertEqual(post.text, post_b.text)
         self.assertEqual(post.author, post_b.author)
         self.assertEqual(post.group, post_b.group)
+        self.assertEqual(post.pics, post_b.pics)
 
     def assertGroup(self, group, group_b):
         self.assertEqual(group.title, group_b.title)
         self.assertEqual(group.description, group_b.description)
 
 
-class PostWithGroupListsTests(PostTests):
+# class PostWithGroupListsTests(PostTests):
+#     @classmethod
+#     def setUpClass(cls):
+#         super().setUpClass()
+#         cls.post = Post.objects.create(
+#             author=cls.user,
+#             text='Текст 1234',
+#             group=cls.group,
+#         )
+
+#     def test_index_page_show_correct_context(self):
+#         """При создании поста с указанной группой он появляется на главной"""
+#         response = self.authorized_client.get(reverse('posts:index'))
+#         first_page_object = response.context['page_obj'][0]
+#         self.assertPost(first_page_object, self.post)
+
+#     def test_group_page_show_correct_context(self):
+#         """При создании поста с указанной группой он появляется на
+#         странице групп"""
+#         response = self.authorized_client.get(reverse(
+#             'posts:group_list',
+#             kwargs={'slug': f'{ self.group.slug }'}))
+#         first_page_object = response.context['page_obj'][0]
+#         group_object = response.context['group']
+#         self.assertGroup(group_object, self.group)
+#         self.assertPost(first_page_object, self.post)
+
+#     def test_profile_page_show_correct_context(self):
+#         """При создании поста с указанной группой он появляется в профиле"""
+#         response = self.authorized_client.get(reverse(
+#             'posts:profile',
+#             kwargs={'username': f'{ self.user.username }'}))
+#         first_page_object = response.context['page_obj'][0]
+#         self.assertPost(first_page_object, self.post)
+
+
+class PostWithGroupAndPictureTests(PostTests):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -41,14 +78,19 @@ class PostWithGroupListsTests(PostTests):
             author=cls.user,
             text='Текст 1234',
             group=cls.group,
+            pics='media/m1000x1000.jpg',
         )
 
     def test_index_page_show_correct_context(self):
+        """При создании поста с картинкой и группой он появляется на главной"""
         response = self.authorized_client.get(reverse('posts:index'))
         first_page_object = response.context['page_obj'][0]
         self.assertPost(first_page_object, self.post)
+        # self.assertEqual(first_page_object.pics, self.post.pics)
 
     def test_group_page_show_correct_context(self):
+        """При создании поста с картинкой и группой  он появляется на
+        странице групп"""
         response = self.authorized_client.get(reverse(
             'posts:group_list',
             kwargs={'slug': f'{ self.group.slug }'}))
@@ -56,13 +98,16 @@ class PostWithGroupListsTests(PostTests):
         group_object = response.context['group']
         self.assertGroup(group_object, self.group)
         self.assertPost(first_page_object, self.post)
+        # self.assertEqual(first_page_object.pics, self.post.pics)
 
     def test_profile_page_show_correct_context(self):
+        """При создании поста с картинкой и группой он появляется в профиле"""
         response = self.authorized_client.get(reverse(
             'posts:profile',
             kwargs={'username': f'{ self.user.username }'}))
         first_page_object = response.context['page_obj'][0]
         self.assertPost(first_page_object, self.post)
+        # self.assertEqual(first_page_object.pics, self.post.pics)
 
 
 class PostPagesTests(PostTests):
@@ -72,6 +117,7 @@ class PostPagesTests(PostTests):
         cls.post = Post.objects.create(
             author=cls.user,
             text='Текст 1234',
+            pics='media/m1000x1000.jpg'
         )
 
     def test_post_create_page_show_correct_context_form_ields(self):
@@ -104,11 +150,13 @@ class PostPagesTests(PostTests):
         self.assertTrue(response.context.get('is_edit'))
 
     def test_post_detail_page_show_correct_context(self):
-        """Шаблон post_detail сформирован с правильным контекстом."""
+        """При создании поста с группой и картинкой он появляется
+        на индивидуальной странице поста"""
         response = self.authorized_client.get(reverse(
             'posts:post_detail',
             kwargs={'post_id': self.post.pk}))
         self.assertPost(response.context['post'], self.post)
+        # self.assertEqual(response.context['post'].pics, self.post.pics)
 
 
 class PaginatorViewsTest(TestCase):
